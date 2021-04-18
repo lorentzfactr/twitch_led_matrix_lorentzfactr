@@ -74,21 +74,23 @@ int colorMixer()
     RgbColor user(rval,gval,bval);
   }
 
- bool correctNumberOfCommas(String message, int expected){
+//!s/o to XavierMidnight for this error checking codes.
+ bool correctNumberOfCommas(String receivedChars, int expected){
   int numFound=0;
      
-  int indexFound = message.indexOf(",");
+  int indexFound = receivedChars.indexOf(",");
   while(indexFound > -1){
     numFound++; 
-    indexFound = message.indexOf(",",indexFound+1);            
+    indexFound = receivedChars.indexOf(",",indexFound+1);            
   }
 
   return(expected == numFound);
 }
 
+//!s/o to XavierMidnight for this error checking codes.
 bool LEDxyIsValid(String message,int expected){
 
-  return (message.indexOf(startMarker) > -1 && message.indexOf(endMarker) && correctNumberOfCommas(message,expected));
+  return (message.indexOf(startMarker) > -1 && message.indexOf(endMarker) && correctNumberOfCommas(receivedChars,expected));
 
 }
 
@@ -97,7 +99,7 @@ char StartEnd(String chatMSG){
     static byte ndx = 0;
     char rc;
     
-    for (int buflen = 0 ; buflen <= 32; buflen++) {
+    for (int buflen = 0 ; buflen <= 100; buflen++) {
       user[buflen] = chatMSG[buflen];
       rc = user[buflen];
       if (recvInProgress == true){
@@ -127,21 +129,44 @@ char StartEnd(String chatMSG){
 //This next set of functions tokenize the string characters and converts the tokens into integer values.
 //Borrowed from Serial Input Basics: https://forum.arduino.cc/index.php?topic=396450
 
+
+
+bool intCheck(String str){
+
+  int found = 0;
+  for (int i = 0; i < str.length() ; i++){
+    if (isDigit(str[i]) == false){
+      found++;
+    }
+  }
+  if (found > 0){
+    Serial.println("\nFound not a digit?\n");
+    Serial.println(found);
+    return false; 
+  }
+  else{return true;}
+}
+
+
 //A Twitch user must define their inputs as !LEDcolor[r,g,b]. 
 char setColor(){
     char * strtokIndx;                           // this is used by strtok() as an index
     
     strtokIndx = strtok(receivedChars,",");      // get the first part - red value
-    rchar = strtokIndx;
-    rval = atoi(strtokIndx);                     // convert this part to an integer
-    
-    strtokIndx = strtok(NULL, ",");              // get the second part - blue value
-    gchar = strtokIndx;
-    gval = atoi(strtokIndx);                     // convert this part to an integer
 
+    if (intCheck(strtokIndx) == true){
+      rval = atoi(strtokIndx);                     // convert this part to an integer
+    }
+
+    strtokIndx = strtok(NULL, ",");              // get the second part - blue value
+    if (intCheck(strtokIndx) == true){  
+      gval = atoi(strtokIndx);                     // convert this part to an integer      
+    }
+    
     strtokIndx = strtok(NULL, ",");              // get the third part - green value
-    bchar = strtokIndx;
-    bval = atoi(strtokIndx);                     // convert this part to an integer
+    if (intCheck(strtokIndx) == true){    
+      bval = atoi(strtokIndx);                     // convert this part to an integer
+    }
  }
 
 //A Twitch user must define their inputs as !LEDline[x_1,y_1,x_2,y_2]. 
@@ -149,17 +174,24 @@ char get2XY(){
     char * strtokIndx;                           // this is used by strtok() as an index
     
     strtokIndx = strtok(receivedChars, ",");      // get the X location
-    x_1 = atoi(strtokIndx);                    // convert this part to an integer
-
+    if (intCheck(strtokIndx) == true){
+      x_1 = atoi(strtokIndx);                    // convert this part to an integer
+    }
+    
     strtokIndx = strtok(NULL, ",");               // get the Y location
-    y_1 = atoi(strtokIndx);                    // convert this part to an integer
-
+    if (intCheck(strtokIndx) == true){
+      y_1 = atoi(strtokIndx);                    // convert this part to an integer
+    }
+    
     strtokIndx = strtok(NULL, ",");      // get the X location
-    x_2 = atoi(strtokIndx);                    // convert this part to an integer
-
+    if (intCheck(strtokIndx) == true){
+      x_2 = atoi(strtokIndx);                    // convert this part to an integer
+    }
+    
     strtokIndx = strtok(NULL, ",");               // get the Y location
-    y_2 = atoi(strtokIndx);                    // convert this part to an integer
-
+    if (intCheck(strtokIndx) == true){
+      y_2 = atoi(strtokIndx);                    // convert this part to an integer
+    }
  }
 
 //A Twitch user must define their inputs as !LEDxy[x,y]
@@ -167,11 +199,14 @@ char get1XY(){
     char * strtokIndx;                           // this is used by strtok() as an index
     
     strtokIndx = strtok(receivedChars, ",");      // get the X location
-    x = atoi(strtokIndx);                         // convert this part to an integer
-
+    if (intCheck(strtokIndx) == true){
+      x = atoi(strtokIndx);                         // convert this part to an integer
+    }
+    
     strtokIndx = strtok(NULL, ",");               // get the Y location
-    y = atoi(strtokIndx);                         // convert this part to an integer
-
+    if (intCheck(strtokIndx) == true){
+      y = atoi(strtokIndx);                         // convert this part to an integer
+    }
  }
 
 

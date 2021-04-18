@@ -141,11 +141,11 @@ void callback(IRCMessage ircMessage) {
    else{
 
     // This is for the usage of users only...
+    StartEnd(message);                              //Find the appropriate information in the string and put it into a list
     
     if (ircMessage.text.indexOf("!LEDcolor") > -1 && LEDxyIsValid(message,2))
       {
         delay(10);
-        StartEnd(message);                                //Find the appropriate information in the string and put it into a list
         setColor();                                       //Turn the string into integers and set the color value   
       } 
   
@@ -154,7 +154,6 @@ void callback(IRCMessage ircMessage) {
     if (ircMessage.text.indexOf("!LEDline") > -1 && LEDxyIsValid(message,3))
       {
         delay(10);
-        StartEnd(message);                               //Find the appropriate information in the string and put it into a list
         get2XY();                                         //Turn the string into integers and set the start location and length of the line
         drawSlope(); 
       }
@@ -163,7 +162,6 @@ void callback(IRCMessage ircMessage) {
     if (ircMessage.text.indexOf("!LEDxy") > -1 && LEDxyIsValid(message,1))
       {
         delay(10);
-        StartEnd(message);                              //Find the appropriate information in the string and put it into a list
         get1XY();                                       //pass the char str of x,y coordinates and define the location by LED index.
         drawOnePix();                                   //display the user defined color at the defined LED index.
       }

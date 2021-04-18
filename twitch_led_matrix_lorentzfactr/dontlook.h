@@ -58,7 +58,7 @@ char password[] = "";  // your network key
 const String twitchChannelName = "";
  
 //The name that you want the bot to have, must use all caps
-#define TWITCH_BOT_NAME "STREAMLABS"
+#define TWITCH_BOT_NAME ""
 #define MY_BOT ""
 //OAuth Key for your twitch bot
 // https://twitchapps.com/tmi/
