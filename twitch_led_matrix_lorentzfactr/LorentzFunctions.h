@@ -1,4 +1,4 @@
-#define PIN 2                     //This pin define doesn't matter for ESP8266 and Neopixelbus
+#define PIN 2
 #define colorSaturation 255       //This defines brightness for specific colors, off = 0, full on = 255
 
 
@@ -13,7 +13,8 @@ char * gchar;
 char * bchar;
 char user[numChars];              //List for incoming string
 char receivedChars[numChars];     
-String chatMSG;
+char startMarker = '(';
+char endMarker = ')';
 
 
 boolean newData = false;          //Logic var for determining the end of the string in startEnd function
@@ -62,11 +63,9 @@ RgbColor blue(0, 0 , colorSaturation);
 RgbColor white(colorSaturation);
 RgbColor black(0);
 
+//This functions defines the start "[" and end marker "]" and puts the string information in between the markers into a list.
+//Borrowed from Serial Input Basics: https://forum.arduino.cc/index.php?topic=396450
 
-
-
-
-//This is a WIP function to play with a different color patterns.
 int colorMixer()
   {
     rval = rval + 10;
@@ -75,17 +74,29 @@ int colorMixer()
     RgbColor user(rval,gval,bval);
   }
 
+ bool correctNumberOfCommas(String message, int expected){
+  int numFound=0;
+     
+  int indexFound = message.indexOf(",");
+  while(indexFound > -1){
+    numFound++; 
+    indexFound = message.indexOf(",",indexFound+1);            
+  }
 
-//This functions defines the start "[" and end marker "]" and puts the string information in between the markers into a list.
-//Borrowed code from Serial Input Basics: https://forum.arduino.cc/index.php?topic=396450
+  return(expected == numFound);
+}
+
+bool LEDxyIsValid(String message,int expected){
+
+  return (message.indexOf(startMarker) > -1 && message.indexOf(endMarker) && correctNumberOfCommas(message,expected));
+
+}
 
 char StartEnd(String chatMSG){
     static boolean recvInProgress = false;
     static byte ndx = 0;
     char rc;
-    char startMarker = '[';
-    char endMarker = ']';
-   
+    
     for (int buflen = 0 ; buflen <= 32; buflen++) {
       user[buflen] = chatMSG[buflen];
       rc = user[buflen];
@@ -166,10 +177,9 @@ char get1XY(){
 
 
 //LorentzFactr's animation to fill the whole screen with the last set color.
-//Each loop displays one column of colors.
 int LFanimation(){
   RgbColor user(rval, gval, bval);                  //set the latest color from a Twitch user
-  for (int i = 0 ; i <= 15; i++)  {                 
+  for (int i = 0 ; i <= 15; i++)  {         //simple for loop that displays each pixel in series 0 to Pixel Count
       //strip.SetPixelColor(i, black);                //wipe the previous color
       //strip.Show();
       //delay(animationSpeed);
@@ -177,7 +187,7 @@ int LFanimation(){
       }
       strip.Show();
       delay(animationSpeed);
-   for (int i = 16 ; i <= 31; i++)  {         t
+   for (int i = 16 ; i <= 31; i++)  {         //simple for loop that displays each pixel in series 0 to Pixel Count
       //strip.SetPixelColor(i, black);                //wipe the previous color
       //strip.Show();
       //delay(animationSpeed);
@@ -185,7 +195,7 @@ int LFanimation(){
       }
       strip.Show();
       delay(animationSpeed);
-    for (int i = 32 ; i <= 47; i++)  {         
+    for (int i = 32 ; i <= 47; i++)  {         //simple for loop that displays each pixel in series 0 to Pixel Count
       //strip.SetPixelColor(i, black);                //wipe the previous color
       //strip.Show();
       //delay(animationSpeed);
@@ -194,7 +204,7 @@ int LFanimation(){
       strip.Show();
       delay(animationSpeed);
     
-    for (int i = 48 ; i <= 63; i++)  {        
+    for (int i = 48 ; i <= 63; i++)  {         //simple for loop that displays each pixel in series 0 to Pixel Count
       //strip.SetPixelColor(i, black);                //wipe the previous color
       //strip.Show();
       //delay(animationSpeed);
@@ -203,7 +213,7 @@ int LFanimation(){
       strip.Show();
       delay(animationSpeed);
 
-      for (int i = 64 ; i <= 79; i++)  {         
+      for (int i = 64 ; i <= 79; i++)  {         //simple for loop that displays each pixel in series 0 to Pixel Count
       //strip.SetPixelColor(i, black);                //wipe the previous color
       //strip.Show();
       //delay(animationSpeed);
@@ -212,7 +222,7 @@ int LFanimation(){
       strip.Show();
       delay(animationSpeed);
 
-      for (int i = 80 ; i <= 95; i++)  {         
+      for (int i = 80 ; i <= 95; i++)  {         //simple for loop that displays each pixel in series 0 to Pixel Count
       //strip.SetPixelColor(i, black);                //wipe the previous color
       //strip.Show();
       //delay(animationSpeed);
@@ -221,7 +231,7 @@ int LFanimation(){
       strip.Show();
       delay(animationSpeed);
 
-      for (int i = 96 ; i <= 111; i++)  {         
+      for (int i = 96 ; i <= 111; i++)  {         //simple for loop that displays each pixel in series 0 to Pixel Count
       //strip.SetPixelColor(i, black);                //wipe the previous color
       //strip.Show();
       //delay(animationSpeed);
@@ -230,7 +240,7 @@ int LFanimation(){
       strip.Show();
       delay(animationSpeed);
       
-      for (int i = 112 ; i <= 127; i++)  {       
+      for (int i = 112 ; i <= 127; i++)  {         //simple for loop that displays each pixel in series 0 to Pixel Count
       //strip.SetPixelColor(i, black);                //wipe the previous color
       //strip.Show();
       //delay(animationSpeed);
@@ -239,7 +249,7 @@ int LFanimation(){
       strip.Show();
       delay(animationSpeed);
 
-      for (int i = 128 ; i <= 143; i++)  {         
+      for (int i = 128 ; i <= 143; i++)  {         //simple for loop that displays each pixel in series 0 to Pixel Count
       //strip.SetPixelColor(i, black);                //wipe the previous color
       //strip.Show();
       //delay(animationSpeed);
@@ -248,7 +258,7 @@ int LFanimation(){
       strip.Show();
       delay(animationSpeed);
 
-      for (int i = 144 ; i <= 159; i++)  {         
+      for (int i = 144 ; i <= 159; i++)  {         //simple for loop that displays each pixel in series 0 to Pixel Count
       //strip.SetPixelColor(i, black);                //wipe the previous color
       //strip.Show();
       //delay(animationSpeed);
@@ -257,7 +267,7 @@ int LFanimation(){
       strip.Show();
       delay(animationSpeed);
 
-      for (int i = 160 ; i <= 175; i++)  {         
+      for (int i = 160 ; i <= 175; i++)  {         //simple for loop that displays each pixel in series 0 to Pixel Count
       //strip.SetPixelColor(i, black);                //wipe the previous color
       //strip.Show();
       //delay(animationSpeed);
@@ -266,7 +276,7 @@ int LFanimation(){
       strip.Show();
       delay(animationSpeed);
 
-      for (int i = 176 ; i <= 191; i++)  {         
+      for (int i = 176 ; i <= 191; i++)  {         //simple for loop that displays each pixel in series 0 to Pixel Count
       //strip.SetPixelColor(i, black);                //wipe the previous color
       //strip.Show();
       //delay(animationSpeed);
@@ -275,7 +285,7 @@ int LFanimation(){
       strip.Show();
       delay(animationSpeed);
 
-      for (int i = 192 ; i <= 207; i++)  {         
+      for (int i = 192 ; i <= 207; i++)  {         //simple for loop that displays each pixel in series 0 to Pixel Count
       //strip.SetPixelColor(i, black);                //wipe the previous color
       //strip.Show();
       //delay(animationSpeed);
@@ -284,7 +294,7 @@ int LFanimation(){
       strip.Show();
       delay(animationSpeed);
    
-      for (int i = 208 ; i <= 223; i++)  {         
+      for (int i = 208 ; i <= 223; i++)  {         //simple for loop that displays each pixel in series 0 to Pixel Count
       //strip.SetPixelColor(i, black);                //wipe the previous color
       //strip.Show();
       //delay(animationSpeed);
@@ -293,7 +303,7 @@ int LFanimation(){
       strip.Show();
       delay(animationSpeed);
 
-      for (int i = 224 ; i <= 239; i++)  {         
+      for (int i = 224 ; i <= 239; i++)  {         //simple for loop that displays each pixel in series 0 to Pixel Count
       //strip.SetPixelColor(i, black);                //wipe the previous color
       //strip.Show();
       //delay(animationSpeed);
@@ -303,7 +313,7 @@ int LFanimation(){
       delay(animationSpeed);
 
 
-      for (int i = 240 ; i <= 255; i++)  {         
+      for (int i = 240 ; i <= 255; i++)  {         //simple for loop that displays each pixel in series 0 to Pixel Count
       //strip.SetPixelColor(i, black);                //wipe the previous color
       //strip.Show();
       //delay(animationSpeed);
@@ -314,10 +324,55 @@ int LFanimation(){
    
 }
 
+int LEDlogo(){
+  delay(100);
+        for (int i = PixelCount ; i >= 0; i--)  {
+            strip.SetPixelColor(i, black);
+            //strip.Show();
+            //delay(10);
+            }
+            
+        for (int i = 50; i <= 59; i++){ 
+         strip.SetPixelColor(i, green);
+        }
+        for (int i = 68; i <= 77; i++){ 
+         strip.SetPixelColor(i, green);
+        }
+        strip.SetPixelColor(90, green);
+        strip.SetPixelColor(91, green);
+        strip.SetPixelColor(101, green);
+        strip.SetPixelColor(100, green);
+        
+        for (int i = 118; i <= 126; i++){ 
+         strip.SetPixelColor(i, green);
+        }
+    
+        for (int i = 129; i <= 137; i++){ 
+         strip.SetPixelColor(i, green);
+        }
+        strip.SetPixelColor(150, green);
+        strip.SetPixelColor(151, green);
+        strip.SetPixelColor(169, green);
+        strip.SetPixelColor(168, green);
+        strip.SetPixelColor(182, green);
+        strip.SetPixelColor(183, green);
+        strip.SetPixelColor(201, green);
+        strip.SetPixelColor(200, green);
+        strip.SetPixelColor(154, green);
+        strip.SetPixelColor(155, green);
+        strip.SetPixelColor(164, green);
+        strip.SetPixelColor(165, green);
+    
+        
+        strip.Show();
+        delay(10);
+  }
 
 
 int craftyGremlin(){
-  
+  rval = 255;
+  gval = 0;
+  bval = 0;
   RgbColor user(rval, gval, bval); 
   for (int i = PixelCount ; i >= 0; i--)  {
             

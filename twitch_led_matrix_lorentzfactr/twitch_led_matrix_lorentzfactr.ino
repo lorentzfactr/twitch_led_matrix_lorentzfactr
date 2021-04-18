@@ -13,8 +13,8 @@
 #include <ESP8266WiFi.h>          //https://github.com/esp8266/Arduino
 #include <IRCClient.h>
 #include <NeoPixelBus.h>          
-#include "dontlook.h"             //Define your Wifi credentials and Twitch Oauth here
-#include "LorentzFunctions.h"     //Some functions I added to animate and parse incoming strings from Twitch chat
+#include "dontlook.h"
+#include "LorentzFunctions.h"
  
 
 
@@ -27,7 +27,7 @@
 
 
 String ircChannel = "";
- 
+
 WiFiClient wiFiClient;
 IRCClient client(IRC_SERVER, IRC_PORT, wiFiClient);
  
@@ -116,7 +116,7 @@ void callback(IRCMessage ircMessage) {
       ircMessage.nick.toUpperCase();
     
       String message("<" + ircMessage.nick + "> " + ircMessage.text);
-   
+      int expected = 0;
       //prints chat to serial
       Serial.println(message);   
 
@@ -125,45 +125,55 @@ void callback(IRCMessage ircMessage) {
 //The && statement ensures that any user except my BOT can use this command. Otherwise, everytime someone calls 
 //!LEDcommands, the code will pick up one of the commands in the BOT message and display it. A real bummer for the 
 //chat who has likely spent the last hour trying to draw something only to be erased by someone just trying to learn how to play.
-
-   if (ircMessage.nick != TWITCH_BOT_NAME){
+   if (ircMessage.nick == TWITCH_BOT_NAME || ircMessage.nick == MY_BOT){
     
-    if (ircMessage.text.indexOf("!LEDcolor") > -1 && ircMessage.text.indexOf("[") > -1 && ircMessage.text.indexOf("]") > -1)
+    // This is for the usage of bots only...
+    
+    if(ircMessage.text.indexOf("Thank you for following") > -1)
           {
-            delay(10);
-            chatMSG = ircMessage.text;
-            StartEnd(chatMSG);                                //Find the appropriate information in the string and put it into a list
-            setColor();                                       //Turn the string into integers and set the color value   
-            sendTwitchMessage(ircMessage.nick + " updated the next color.");
-             
+          craftyGremlin();
           }
 
-    if (ircMessage.text.indexOf("!LEDline") > -1 && ircMessage.text.indexOf("[") > -1 && ircMessage.text.indexOf("]") > -1)
-          {
-            delay(10);
-            chatMSG = ircMessage.text;
-            StartEnd(chatMSG);                               //Find the appropriate information in the string and put it into a list
-            get2XY();                                         //Turn the string into integers and set the start location and length of the line
-            drawSlope(); 
-   
-          }
+          //ADD more fun stuff if people follow, sub, etc...
+   }
+
+
+   else{
+
+    // This is for the usage of users only...
+    
+    if (ircMessage.text.indexOf("!LEDcolor") > -1 && LEDxyIsValid(message,2))
+      {
+        delay(10);
+        StartEnd(message);                                //Find the appropriate information in the string and put it into a list
+        setColor();                                       //Turn the string into integers and set the color value   
+      } 
+  
+          
+
+    if (ircMessage.text.indexOf("!LEDline") > -1 && LEDxyIsValid(message,3))
+      {
+        delay(10);
+        StartEnd(message);                               //Find the appropriate information in the string and put it into a list
+        get2XY();                                         //Turn the string into integers and set the start location and length of the line
+        drawSlope(); 
+      }
+
          
-    if (ircMessage.text.indexOf("!LEDxy") > -1 && ircMessage.text.indexOf("[") > -1 && ircMessage.text.indexOf("]") > -1)
-          {
-            delay(10);
-            chatMSG = ircMessage.text;
-            StartEnd(chatMSG);                             //Find the appropriate information in the string and put it into a list
-            get1XY();                                       //pass the char str of x,y coordinates and define the location by LED index.
-            drawOnePix();                                  //display the user defined color at the defined LED index.
-          }
-   
+    if (ircMessage.text.indexOf("!LEDxy") > -1 && LEDxyIsValid(message,1))
+      {
+        delay(10);
+        StartEnd(message);                              //Find the appropriate information in the string and put it into a list
+        get1XY();                                       //pass the char str of x,y coordinates and define the location by LED index.
+        drawOnePix();                                   //display the user defined color at the defined LED index.
+      }
+    
     if (ircMessage.text.indexOf("!LEDfill") > -1)
-          {
-            delay(10);
-            
-              LFanimation();                                  //overwrite all pixels with current last known RGB values   
-          }
-             
+      {
+        delay(10);
+        LFanimation();                                  //overwrite all pixels with current last known RGB values
+      }
+      
     if (ircMessage.text == "!LEDred"){
         delay(10);
         rval = 200;
@@ -179,7 +189,7 @@ void callback(IRCMessage ircMessage) {
         bval = 0;
         LFanimation();
     }
-   
+    
     if (ircMessage.text == "!LEDgreen"){
         delay(10);
         rval = 0;
@@ -187,7 +197,8 @@ void callback(IRCMessage ircMessage) {
         bval = 0;
         LFanimation();
     }
-           
+    
+         
     if (ircMessage.text == "!LEDblue"){
         delay(10);
         rval = 0;
@@ -195,37 +206,190 @@ void callback(IRCMessage ircMessage) {
         bval = 200;
         LFanimation();
     }
-       
+    
+    
     if (ircMessage.text == "!LEDwhite"){
         delay(10);
         rval = 200;
         gval = 200;
         bval = 200;
         LFanimation();
-    }    
+    }
+    
+          
+          
+    if (ircMessage.text == "!LEDroots"){
+          delay(100);
+          for (int i = 0 ; i <= 10; i++)  {
+            strip.SetPixelColor(i, black);
+            strip.Show();
+            delay(1);
+            strip.SetPixelColor(i, red);
+            strip.Show();
+            delay(1);
+            }
+    
+           for (int i = 11 ; i <= 20; i++)  {
+            strip.SetPixelColor(i, black);
+            strip.Show();
+            delay(1);
+            strip.SetPixelColor(i, yellow);
+            strip.Show();
+            delay(1);
+            }
+          for (int i = 21 ; i <= PixelCount; i++)  {
+            strip.SetPixelColor(i, black);
+            strip.Show();
+            delay(1);
+            strip.SetPixelColor(i, green);
+            strip.Show();
+            delay(1);
+            }
+          }
+    
+    if (ircMessage.text == "!LEDmurica"){
+          delay(100);
+          for (int i = 0 ; i <= 10; i++)  {
+            strip.SetPixelColor(i, black);
+            strip.Show();
+            delay(1);
+            strip.SetPixelColor(i, red);
+            strip.Show();
+            delay(1);
+            }
+    
+           for (int i = 11 ; i <= 20; i++)  {
+            strip.SetPixelColor(i, black);
+            strip.Show();
+            delay(1);
+            strip.SetPixelColor(i, white);
+            strip.Show();
+            delay(1);
+            }
+          for (int i = 21 ; i <= PixelCount; i++)  {
+            strip.SetPixelColor(i, black);
+            strip.Show();
+            delay(1);
+            strip.Show();strip.SetPixelColor(i, blue);
+            strip.Show();
+            delay(1);
+            }
+          }
+  
+     if (ircMessage.text == "!LEDKITT"){
+          delay(50);
+          for (int i = 0 ; i <= PixelCount; i++)  {
+              strip.SetPixelColor(i, black);
+              strip.Show();
+          }
+          for (int i = 0 ; i <= 5; i++) {
+            for (int i = 0 ; i <= PixelCount; i++)  {
+              strip.SetPixelColor(i, black);
+              strip.Show();
+              delay(1);
+              }
+            for (int i = 0 ; i <= PixelCount; i++)  {
+              strip.SetPixelColor(i, red);
+              strip.Show();
+              delay(1);
+              }
+            for (int i = PixelCount ; i >= 0; i--)  {
+              strip.SetPixelColor(i, black);
+              strip.Show();
+              delay(1);
+              }
+            for (int i = PixelCount ; i >= 0; i--)  {
+              strip.SetPixelColor(i, red);
+              strip.Show();
+              delay(1);
+              }
+              for (int i = 0 ; i <= PixelCount; i++)  {
+              strip.SetPixelColor(i, black);
+              strip.Show();
+              delay(1);
+              }
+            for (int i = 0 ; i <= PixelCount; i++)  {
+              strip.SetPixelColor(i, red);
+              strip.Show();
+              delay(1);
+              }
+             for (int i = PixelCount ; i >= 0; i--)  {
+              strip.SetPixelColor(i, black);
+              strip.Show();
+              delay(1);
+              }
+            for (int i = PixelCount ; i >= 0; i--)  {
+              strip.SetPixelColor(i, red);
+              strip.Show();
+              delay(1);
+              }
+            } 
+           }
+    
+    if (ircMessage.text == "!LEDLF"){
+        delay(100);
+        for (int i = PixelCount ; i >= 0; i--)  {
+            strip.SetPixelColor(i, blue);
+            //strip.Show();
+            //delay(10);
+        }
+            
+        for (int i = 50; i <= 59; i++){ 
+         strip.SetPixelColor(i, green);
+        }
+        for (int i = 68; i <= 77; i++){ 
+         strip.SetPixelColor(i, green);
+        }
+        strip.SetPixelColor(90, green);
+        strip.SetPixelColor(91, green);
+        strip.SetPixelColor(101, green);
+        strip.SetPixelColor(100, green);
+        
+        for (int i = 118; i <= 126; i++){ 
+         strip.SetPixelColor(i, yellow);
+        }
+    
+        for (int i = 129; i <= 137; i++){ 
+         strip.SetPixelColor(i, yellow);
+        }
+        strip.SetPixelColor(150, yellow);
+        strip.SetPixelColor(151, yellow);
+        strip.SetPixelColor(169, yellow);
+        strip.SetPixelColor(168, yellow);
+        strip.SetPixelColor(182, yellow);
+        strip.SetPixelColor(183, yellow);
+        strip.SetPixelColor(201, yellow);
+        strip.SetPixelColor(200, yellow);
+        strip.SetPixelColor(154, red);
+        strip.SetPixelColor(155, red);
+        strip.SetPixelColor(164, red);
+        strip.SetPixelColor(165, red);
+    
+        strip.Show();
+        delay(10);
+    }
     
     if (ircMessage.text == "!LEDcrafty_gremlin"){
         rval = 255;
         gval = 0;
         bval = 0;
         craftyGremlin();
-        }
+    }
         
     if (ircMessage.text == "!LEDLOGO"){
-        
-        LEDlogo();   
+        LEDlogo();     
     }
-   
-    if (ircMessage.nick != TWITCH_BOT_NAME && ircMessage.text == "!LEDoff"){
+
+    if (ircMessage.text == "!LEDoff"){
         delay(10);
         rval = 0;
         gval = 0;
         bval = 0;
         LFanimation();
     }
-   }
-    
-    return;
+   }  
+   return;
   }
+
 }
  
